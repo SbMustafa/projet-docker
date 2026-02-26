@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: testdb
+    networks:
+      - app-network
+    volumes:
+      - db-data:/var/lib/mysql 
+
+  
+  backend:
+    build: ./server
+    container_name: backend-container
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: testdb
+    depends_on:
+      - mysql-db
+    networks:
+      - app-network
+
+  frontend:
+    build: ./client
+    container_name: frontend-container
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+
+volumes:
+  db-data:
